@@ -1,0 +1,42 @@
+- hosts: all
+  tasks :
+   - name: Mounting RedHat DVD
+     mount: 
+        src: "/dev/cdrom"
+        path: "/dvd"
+        state: mounted
+        fstype: "iso9660"
+
+   - name : Creating local yum repo from DVD
+     yum_repository:
+        baseurl: "/dvd/AppStream"
+        name: "MyDVD"
+        description: "Yum repo from DVD"
+        gpgcheck: no
+
+   - yum_repository:
+        baseurl: "/dvd/BaseOS"
+        name: "MyDVD2"
+        description: "Yum repo from DVD"
+        gpgcheck: no
+
+   - name: Installing Apache web-server
+     package:
+        name: "httpd"
+        state: present
+
+   - name: Copying html file to DocumenRoot
+     copy: 
+        dest: "/var/www/html/index.html"
+        content : "Successfully configured webserver using Ansible"
+
+   - name : Starting webserver
+     service:
+        name : "httpd"
+        state: started
+        enabled: yes
+
+   - firewalld :
+        port: "80/tcp"
+        state: enabled
+        immediate: yes
